@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +69,26 @@ public class DockerController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(Map.of("error", "Error al inspeccionar contenedor: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/networks")
+    public ResponseEntity<?> networks() {
+        try {
+            return ResponseEntity.ok(dockerService.getNetworks());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Error al obtener redes: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/networks/{id}")
+    public ResponseEntity<?> inspectNetwork(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(dockerService.inspectNetwork(id));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Error al inspeccionar red: " + e.getMessage()));
         }
     }
 

@@ -44,9 +44,9 @@ http://localhost:8080
 
 | Usuario | Contraseña |
 |---------|------------|
-| `admin` | `admin` |
+| `millanda29` | `isaalab2026` |
 
-> ⚠️ Cambia las credenciales en `SecurityConfig.java` antes de producción.
+> ⚠️ Cambia las credenciales en `application.properties` antes de producción.
 
 ## 📡 API
 
@@ -60,6 +60,8 @@ http://localhost:8080
 | POST | `/api/docker/start/{id}` | Iniciar contenedor |
 | POST | `/api/docker/stop/{id}` | Detener contenedor |
 | POST | `/api/docker/restart/{id}` | Reiniciar contenedor |
+| GET | `/api/docker/networks` | Listar redes Docker |
+| GET | `/api/docker/networks/{id}` | Inspeccionar red con contenedores conectados |
 
 ## 📁 Estructura
 

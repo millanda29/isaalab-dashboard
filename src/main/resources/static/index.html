@@ -99,6 +99,9 @@
         .chart-bar .bar-fill.blue { background:var(--accent); }
         .chart-bar .bar-value { font-size:0.8rem; min-width:45px; text-align:right; }
         .table-wrap { overflow-x:auto; }
+        .mt-1 { margin-top:0.5rem; }
+        .text-sm { font-size:0.85rem; }
+        .text-muted { color:var(--text-muted); }
         @media (max-width:768px) {
             body { padding:0.75rem; }
             .header { flex-direction:column; align-items:flex-start; }
@@ -152,7 +155,10 @@
     </div>
     <div class="toolbar">
         <h2 data-i18n="containers">Contenedores Docker</h2>
-        <input type="text" class="search-box" id="searchInput" placeholder="🔍 Buscar contenedor..." oninput="filterContainers()">
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <input type="text" class="search-box" id="searchInput" placeholder="🔍 Buscar contenedor..." oninput="filterContainers()">
+            <button class="btn btn-details" onclick="showNetworks()">🌐 Redes</button>
+        </div>
     </div>
     <div class="table-wrap">
         <table>
@@ -191,6 +197,13 @@
             <span class="close" onclick="closeModal('detailModal')">&times;</span>
             <h3 style="margin-bottom:1rem;color:var(--text);" id="detailTitle">Detalles</h3>
             <pre id="detailContent">Cargando...</pre>
+        </div>
+    </div>
+    <div id="networkModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('networkModal')">&times;</span>
+            <h3 style="margin-bottom:1rem;color:var(--text);" id="networkTitle">Redes Docker</h3>
+            <div id="networkList"></div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -442,6 +455,34 @@
                     if (me) me.textContent = s.memory;
                 });
             } catch (e) {}
+        }
+
+        async function showNetworks() {
+            document.getElementById('networkModal').style.display = 'block';
+            document.getElementById('networkTitle').textContent = '🌐 Redes Docker';
+            document.getElementById('networkList').innerHTML = '<div class="loading">Cargando redes...</div>';
+            try {
+                const res = await fetch('/api/docker/networks');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const networks = await res.json();
+                let html = '';
+                for (const net of networks) {
+                    const netRes = await fetch('/api/docker/networks/' + net.id);
+                    const netDetail = await netRes.json();
+                    const containers = netDetail.Containers || {};
+                    const containerNames = Object.values(containers).map(c => c.Name).join(', ') || 'Ninguno';
+                    html += '<div class="card" style="margin-bottom:0.75rem;">' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">' +
+                        '<div><strong>' + net.name + '</strong> <span class="text-muted text-sm">(' + net.driver + ')</span></div>' +
+                        '<span class="badge badge-green">' + Object.keys(containers).length + ' contenedores</span>' +
+                        '</div>' +
+                        '<div class="text-sm text-muted mt-1">Conectados: ' + (Object.values(containers).map(c => c.Name).join(', ') || 'Ninguno') + '</div>' +
+                        '</div>';
+                });
+                document.getElementById('networkList').innerHTML = html;
+            } catch (e) {
+                document.getElementById('networkList').innerHTML = '<div class="error">Error al cargar redes</div>';
+            }
         }
 
         async function load() { await loadSystem(); await loadContainers(); await loadStats(); }

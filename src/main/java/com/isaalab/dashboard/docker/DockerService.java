@@ -15,7 +15,7 @@ public class DockerService {
 
     public List<ContainerInfo> getContainers() throws IOException {
         ProcessBuilder pb = new ProcessBuilder(
-                "docker", "ps", "--format", "{{.ID}}|{{.Names}}|{{.Image}}|{{.Status}}|{{.Ports}}"
+                "docker", "ps", "-a", "--format", "{{.ID}}|{{.Names}}|{{.Image}}|{{.Status}}|{{.Ports}}"
         );
         Process process = pb.start();
 
@@ -41,6 +41,56 @@ public class DockerService {
     @SuppressWarnings("unchecked")
     public Map<String, Object> inspectContainer(String id) throws IOException, InterruptedException {
         ProcessBuilder pb = new ProcessBuilder("docker", "inspect", id);
+        Process process = pb.start();
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+
+            StringBuilder json = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                json.append(line);
+            }
+
+            com.fasterxml.jackson.databind.ObjectMapper mapper =
+                    new com.fasterxml.jackson.databind.ObjectMapper();
+            List<Map<String, Object>> result = mapper.readValue(json.toString(), List.class);
+            if (!result.isEmpty()) {
+                return result.get(0);
+            }
+            return Map.of();
+        }
+    }
+
+    public List<Map<String, String>> getNetworks() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder(
+                "docker", "network", "ls", "--format", "{{.ID}}|{{.Name}}|{{.Driver}}|{{.Scope}}"
+        );
+        Process process = pb.start();
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+
+            List<Map<String, String>> networks = new ArrayList<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] v = line.split("\\|");
+                if (v.length >= 4) {
+                    Map<String, String> net = new java.util.LinkedHashMap<>();
+                    net.put("id", v[0]);
+                    net.put("name", v[1]);
+                    net.put("driver", v[2]);
+                    net.put("scope", v[3]);
+                    networks.add(net);
+                }
+            }
+            return networks;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> inspectNetwork(String id) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder("docker", "network", "inspect", id);
         Process process = pb.start();
 
         try (BufferedReader reader = new BufferedReader(
