@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISAALAB Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --green: #4ade80;
+            --yellow: #facc15;
+            --red: #f87171;
+            --bg-green: #166534;
+            --bg-yellow: #713f12;
+            --bg-red: #7f1d1d;
+        }
+        .light {
+            --bg: #f8fafc;
+            --bg-card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 1rem;
+            transition: background 0.3s, color 0.3s;
+        }
+        .header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem; }
+        .header-left h1 { font-size:1.8rem; color:var(--accent); }
+        .header-left .subtitle { color:var(--text-muted); }
+        .header-right { display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+        .card { background:var(--bg-card); border-radius:0.75rem; padding:1.25rem; border:1px solid var(--border); }
+        .card .label { font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+        .card .value { font-size:1.6rem; font-weight:700; margin-top:0.25rem; }
+        .card .value.green { color:var(--green); }
+        .card .value.yellow { color:var(--yellow); }
+        .card .value.red { color:var(--red); }
+        .card .value.blue { color:var(--accent); }
+        .card .mini-chart { margin-top:0.5rem; height:40px; }
+        .toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1rem; }
+        .toolbar h2 { color:var(--text); font-size:1.2rem; }
+        .search-box { background:var(--bg-card); border:1px solid var(--border); border-radius:0.5rem; padding:0.5rem 1rem; color:var(--text); font-size:0.9rem; min-width:200px; }
+        .search-box::placeholder { color:var(--text-muted); }
+        table { width:100%; border-collapse:collapse; background:var(--bg-card); border-radius:0.75rem; overflow:hidden; border:1px solid var(--border); }
+        th, td { padding:0.75rem 1rem; text-align:left; border-bottom:1px solid var(--border); }
+        th { background:var(--bg-card); color:var(--text-muted); text-transform:uppercase; font-size:0.75rem; letter-spacing:0.05em; }
+        tr:hover { background:rgba(255,255,255,0.03); }
+        .badge { display:inline-block; padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.75rem; font-weight:600; }
+        .badge-green { background:var(--bg-green); color:var(--green); }
+        .badge-red { background:var(--bg-red); color:var(--red); }
+        .badge-yellow { background:var(--bg-yellow); color:var(--yellow); }
+        button, .btn { padding:0.4rem 0.8rem; border:none; border-radius:0.5rem; cursor:pointer; font-size:0.8rem; font-weight:600; transition:opacity 0.2s; }
+        button:hover { opacity:0.8; }
+        .btn-restart { background:#f59e0b; color:#1e293b; }
+        .btn-start { background:var(--green); color:#1e293b; }
+        .btn-stop { background:var(--red); color:#fff; }
+        .btn-logs { background:#3b82f6; color:#fff; }
+        .btn-details { background:#8b5cf6; color:#fff; }
+        .btn-download { background:#06b6d4; color:#fff; }
+        .btn-theme { background:var(--bg-card); color:var(--text); border:1px solid var(--border); }
+        .btn-lang { background:var(--bg-card); color:var(--text); border:1px solid var(--border); }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; }
+        .modal-content { background:var(--bg-card); margin:3% auto; padding:1.5rem; width:92%; max-width:900px; border-radius:0.75rem; border:1px solid var(--border); max-height:80vh; overflow-y:auto; }
+        .modal-content pre { background:var(--bg); padding:1rem; border-radius:0.5rem; overflow-x:auto; font-size:0.8rem; color:var(--text); max-height:50vh; overflow-y:auto; }
+        .close { float:right; cursor:pointer; font-size:1.5rem; color:var(--text-muted); }
+        .close:hover { color:var(--text); }
+        .toast-container { position:fixed; top:1rem; right:1rem; z-index:9999; display:flex; flex-direction:column; gap:0.5rem; }
+        .toast { padding:0.75rem 1.25rem; border-radius:0.5rem; font-size:0.9rem; font-weight:500; animation:slideIn 0.3s ease; max-width:350px; }
+        .toast-success { background:var(--bg-green); color:var(--green); border:1px solid var(--green); }
+        .toast-error { background:var(--bg-red); color:var(--red); border:1px solid var(--red); }
+        .toast-info { background:#1e3a5f; color:var(--accent); border:1px solid var(--accent); }
+        @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+        .toast-out { animation:slideOut 0.3s ease forwards; }
+        @keyframes slideOut { from { transform:translateX(0); opacity:1; } to { transform:translateX(100%); opacity:0; } }
+        .status-up { color:var(--green); }
+        .status-paused { color:var(--yellow); }
+        .status-exited { color:var(--red); }
+        .loading { color:var(--text-muted); text-align:center; padding:2rem; }
+        .error { color:var(--red); text-align:center; padding:2rem; }
+        .skeleton { background:linear-gradient(90deg,var(--bg-card) 25%,var(--border) 50%,var(--bg-card) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:0.5rem; height:2rem; margin-top:0.25rem; }
+        @keyframes shimmer { 0% { background-position:200% 0; } 100% { background-position:-200% 0; } }
+        .chart-bar { display:flex; align-items:center; gap:0.5rem; }
+        .chart-bar .bar { height:6px; border-radius:3px; background:var(--border); flex:1; overflow:hidden; }
+        .chart-bar .bar-fill { height:100%; border-radius:3px; transition:width 0.5s ease; }
+        .chart-bar .bar-fill.green { background:var(--green); }
+        .chart-bar .bar-fill.yellow { background:var(--yellow); }
+        .chart-bar .bar-fill.red { background:var(--red); }
+        .chart-bar .bar-fill.blue { background:var(--accent); }
+        .chart-bar .bar-value { font-size:0.8rem; min-width:45px; text-align:right; }
+        .table-wrap { overflow-x:auto; }
+        @media (max-width:768px) {
+            body { padding:0.75rem; }
+            .header { flex-direction:column; align-items:flex-start; }
+            .header-right { width:100%; }
+            .grid { grid-template-columns:repeat(2,1fr); }
+            th, td { padding:0.5rem; font-size:0.8rem; }
+            .modal-content { width:95%; margin:10% auto; }
+        }
+        @media (max-width:480px) {
+            .grid { grid-template-columns:1fr; }
+            .toolbar { flex-direction:column; align-items:stretch; }
+            .search-box { width:100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="header">
+        <div class="header-left">
+            <h1>ISAALAB Infrastructure</h1>
+            <p class="subtitle" id="serverStatus">Cargando...</p>
+        </div>
+        <div class="header-right">
+            <button class="btn-lang" id="langBtn" onclick="toggleLang()">🇪🇸 ES</button>
+            <button class="btn-theme" id="themeBtn" onclick="toggleTheme()">🌙</button>
+        </div>
+    </div>
+    <div class="grid" id="systemGrid">
+        <div class="card">
+            <div class="label" data-i18n="cpu">CPU</div>
+            <div class="value" id="cpu"><div class="skeleton" style="height:2rem;width:80%"></div></div>
+            <div class="mini-chart"><canvas id="cpuChart" height="40"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="label" data-i18n="ram">RAM</div>
+            <div class="value" id="memory"><div class="skeleton" style="height:2rem;width:80%"></div></div>
+            <div class="mini-chart"><canvas id="memChart" height="40"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="label" data-i18n="disk">DISCO</div>
+            <div class="value" id="disk"><div class="skeleton" style="height:2rem;width:80%"></div></div>
+            <div class="chart-bar mt-1">
+                <div class="bar"><div class="bar-fill blue" id="diskBar" style="width:0%"></div></div>
+                <span class="bar-value text-sm text-muted" id="diskDetail"></span>
+            </div>
+        </div>
+        <div class="card">
+            <div class="label" data-i18n="uptime">UPTIME</div>
+            <div class="value blue" id="uptime"><div class="skeleton" style="height:2rem;width:60%"></div></div>
+        </div>
+    </div>
+    <div class="toolbar">
+        <h2 data-i18n="containers">Contenedores Docker</h2>
+        <input type="text" class="search-box" id="searchInput" placeholder="🔍 Buscar contenedor..." oninput="filterContainers()">
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th data-i18n="status">Estado</th>
+                    <th data-i18n="name">Nombre</th>
+                    <th data-i18n="image">Imagen</th>
+                    <th data-i18n="statusCol">Estado</th>
+                    <th data-i18n="ports">Puertos</th>
+                    <th data-i18n="cpuCol">CPU</th>
+                    <th data-i18n="ramCol">RAM</th>
+                    <th data-i18n="actions">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="containers">
+                <tr><td colspan="8" class="loading" data-i18n="loading">Cargando contenedores...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="logModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('logModal')">&times;</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+                <h3 style="color:var(--text);" id="logTitle">Logs</h3>
+                <div style="display:flex;gap:0.5rem;">
+                    <button class="btn btn-download" id="downloadLogsBtn" onclick="downloadLogs()">Descargar</button>
+                    <button class="btn btn-logs" id="loadMoreLogs" onclick="loadMoreLogs()">Cargar más</button>
+                </div>
+            </div>
+            <pre id="logContent">Cargando...</pre>
+        </div>
+    </div>
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('detailModal')">&times;</span>
+            <h3 style="margin-bottom:1rem;color:var(--text);" id="detailTitle">Detalles</h3>
+            <pre id="detailContent">Cargando...</pre>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        const i18n = {
+            es: {
+                cpu:'CPU', ram:'RAM', disk:'DISCO', uptime:'UPTIME',
+                containers:'Contenedores Docker', status:'Estado', name:'Nombre',
+                image:'Imagen', statusCol:'Estado', ports:'Puertos',
+                cpuCol:'CPU', ramCol:'RAM', actions:'Acciones',
+                loading:'Cargando contenedores...', error:'Error al cargar contenedores',
+                online:'Servidor ONLINE', offline:'Servidor OFFLINE',
+                restart:'Reiniciar', start:'Iniciar', stop:'Detener',
+                logs:'Logs', details:'Detalles', downloadLogs:'Descargar',
+                loadMore:'Cargar más', search:'Buscar contenedor...',
+                confirmRestart:'Reiniciar contenedor', confirmStart:'Iniciar contenedor',
+                confirmStop:'Detener contenedor', logTitle:'Logs',
+                detailTitle:'Detalles del contenedor', noContainers:'No hay contenedores',
+                filterEmpty:'No se encontraron contenedores con ese nombre'
+            },
+            en: {
+                cpu:'CPU', ram:'RAM', disk:'DISK', uptime:'UPTIME',
+                containers:'Docker Containers', status:'Status', name:'Name',
+                image:'Image', statusCol:'Status', ports:'Ports',
+                cpuCol:'CPU', ramCol:'RAM', actions:'Actions',
+                loading:'Loading containers...', error:'Error loading containers',
+                online:'Server ONLINE', offline:'Server OFFLINE',
+                restart:'Restart', start:'Start', stop:'Stop',
+                logs:'Logs', details:'Details', downloadLogs:'Download',
+                loadMore:'Load more', search:'Search container...',
+                confirmRestart:'Restart container', confirmStart:'Start container',
+                confirmStop:'Stop container', logTitle:'Logs',
+                detailTitle:'Container details', noContainers:'No containers',
+                filterEmpty:'No containers found with that name'
+            }
+        };
+        let currentLang = 'es';
+        let logTail = 50;
+        let currentLogId = null;
+        let cpuChart = null;
+        let memChart = null;
+
+        function t(k) { return i18n[currentLang][k] || k; }
+
+        function toggleLang() {
+            currentLang = currentLang === 'es' ? 'en' : 'es';
+            document.getElementById('langBtn').textContent = currentLang === 'es' ? '🇪🇸 ES' : '🇬🇧 EN';
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const k = el.dataset.i18n;
+                if (el.tagName === 'INPUT' && el.placeholder) el.placeholder = t(k);
+                else el.textContent = t(k);
+            });
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+            document.getElementById('themeBtn').textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+        }
+
+        function toast(msg, type) {
+            const c = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = 'toast toast-' + type;
+            el.textContent = msg;
+            c.appendChild(el);
+            setTimeout(() => { el.classList.add('toast-out'); setTimeout(() => el.remove(), 300); }, 3000);
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+
+        function initCharts() {
+            const opts = { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false},y:{display:false,min:0,max:100}} };
+            cpuChart = new Chart(document.getElementById('cpuChart'), { type:'line', data:{labels:[],datasets:[{data:[],borderColor:'#38bdf8',borderWidth:2,fill:false,pointRadius:0,tension:0.3}]}, options:opts });
+            memChart = new Chart(document.getElementById('memChart'), { type:'line', data:{labels:[],datasets:[{data:[],borderColor:'#4ade80',borderWidth:2,fill:false,pointRadius:0,tension:0.3}]}, options:opts });
+        }
+
+        function updateChart(chart, val) {
+            if (!chart) return;
+            const d = chart.data.datasets[0].data;
+            d.push(val);
+            if (d.length > 20) d.shift();
+            chart.data.labels = d.map((_,i) => i);
+            chart.update();
+        }
+
+        function toast(msg, type) {
+            const c = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = 'toast toast-' + type;
+            el.textContent = msg;
+            c.appendChild(el);
+            setTimeout(() => { el.classList.add('toast-out'); setTimeout(() => el.remove(), 300); }, 3000);
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+
+        async function loadSystem() {
+            try {
+                const res = await fetch('/api/system');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const info = await res.json();
+                if (info.error) throw new Error(info.error);
+                document.getElementById('cpu').innerHTML = info.cpuPercent.toFixed(1) + '%';
+                document.getElementById('memory').innerHTML = info.memoryPercent.toFixed(1) + '%';
+                document.getElementById('disk').innerHTML = info.diskPercent.toFixed(1) + '%';
+                document.getElementById('uptime').innerHTML = info.uptime;
+                document.getElementById('serverStatus').textContent = t('online');
+                document.getElementById('serverStatus').style.color = 'var(--green)';
+                document.getElementById('diskBar').style.width = info.diskPercent.toFixed(0) + '%';
+                const dUsed = (info.diskUsed / 1073741824).toFixed(1);
+                const dTotal = (info.diskTotal / 1073741824).toFixed(1);
+                document.getElementById('diskDetail').textContent = dUsed + 'G / ' + dTotal + 'G';
+                if (cpuChart) updateChart(cpuChart, info.cpuPercent);
+                if (memChart) updateChart(memChart, info.memoryPercent);
+            } catch (e) {
+                document.getElementById('serverStatus').textContent = t('offline');
+                document.getElementById('serverStatus').style.color = 'var(--red)';
+            }
+        }
+
+        function updateChart(chart, val) {
+            if (!chart) return;
+            const d = chart.data.datasets[0].data;
+            d.push(val);
+            if (d.length > 20) d.shift();
+            chart.data.labels = d.map((_,i) => i);
+            chart.update();
+        }
+
+        async function loadContainers() {
+            try {
+                const res = await fetch('/api/docker/containers');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const containers = await res.json();
+                const tbody = document.getElementById('containers');
+                if (containers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="loading">' + t('noContainers') + '</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                containers.forEach(c => {
+                    const isUp = c.status.startsWith('Up');
+                    const isPaused = c.status.startsWith('Paused');
+                    const badgeClass = isUp ? 'badge-green' : isPaused ? 'badge-yellow' : 'badge-red';
+                    const icon = isUp ? '🟢' : isPaused ? '🟡' : '🔴';
+                    tbody.innerHTML += '<tr data-name="' + c.name.toLowerCase() + '">' +
+                        '<td><span class="badge ' + badgeClass + '">' + icon + '</span></td>' +
+                        '<td><strong>' + c.name + '</strong></td>' +
+                        '<td>' + c.image + '</td>' +
+                        '<td class="' + (isUp ? 'status-up' : isPaused ? 'status-paused' : 'status-exited') + '">' + c.status + '</td>' +
+                        '<td>' + (c.ports || '-') + '</td>' +
+                        '<td id="cpu-' + c.name + '">-</td>' +
+                        '<td id="mem-' + c.name + '">-</td>' +
+                        '<td style="display:flex;gap:0.25rem;flex-wrap:wrap;">' +
+                            '<button class="btn btn-logs" onclick="showLogs(\'' + c.name + '\')">' + t('logs') + '</button>' +
+                            '<button class="btn btn-details" onclick="showDetails(\'' + c.name + '\')">' + t('details') + '</button>' +
+                            '<button class="btn btn-start" onclick="execAction(\'start\',\'' + c.name + '\')">' + t('start') + '</button>' +
+                            '<button class="btn btn-stop" onclick="execAction(\'stop\',\'' + c.name + '\')">' + t('stop') + '</button>' +
+                            '<button class="btn btn-restart" onclick="execAction(\'restart\',\'' + c.name + '\')">' + t('restart') + '</button>' +
+                        '</td></tr>';
+                });
+                filterContainers();
+            } catch (e) {
+                document.getElementById('containers').innerHTML = '<tr><td colspan="8" class="error">' + t('error') + '</td></tr>';
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/docker/stats');
+                if (!res.ok) return;
+                const stats = await res.json();
+                stats.forEach(s => {
+                    const ce = document.getElementById('cpu-' + s.name);
+                    const me = document.getElementById('mem-' + s.name);
+                    if (ce) ce.textContent = s.cpu;
+                    if (me) me.textContent = s.memory;
+                });
+            } catch (e) {}
+        }
+
+        function filterContainers() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('#containers tr').forEach(tr => {
+                tr.style.display = (tr.dataset.name || '').includes(q) ? '' : 'none';
+            });
+        }
+
+        async function execAction(action, id) {
+            const msgs = { restart:t('confirmRestart'), start:t('confirmStart'), stop:t('confirmStop') };
+            if (!confirm(msgs[action] + ' ' + id + '?')) return;
+            try {
+                const res = await fetch('/api/docker/' + action + '/' + id, { method:'POST' });
+                const data = await res.json();
+                if (data.status === 'ok') { toast('✅ ' + action + ' ' + id, 'success'); loadContainers(); }
+                else toast('❌ Error al ' + action + ' ' + id, 'error');
+            } catch (e) { toast('❌ Error al ' + action + ' ' + id, 'error'); }
+        }
+
+        async function showLogs(id) {
+            currentLogId = id; logTail = 50;
+            document.getElementById('logModal').style.display = 'block';
+            document.getElementById('logTitle').textContent = t('logTitle') + ' - ' + id;
+            document.getElementById('logContent').textContent = t('loading');
+            await fetchLogs(id, logTail);
+        }
+
+        async function fetchLogs(id, tail) {
+            try {
+                const res = await fetch('/api/docker/logs/' + id + '?tail=' + tail);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                document.getElementById('logContent').textContent = (await res.json()).join('\n');
+            } catch (e) { document.getElementById('logContent').textContent = 'Error al cargar logs'; }
+        }
+
+        function loadMoreLogs() { if (currentLogId) { logTail += 100; fetchLogs(currentLogId, logTail); } }
+
+        function downloadLogs() {
+            const blob = new Blob([document.getElementById('logContent').textContent], { type:'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = (currentLogId || 'container') + '-logs.txt';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            toast('Logs descargados', 'success');
+        }
+
+        async function showDetails(id) {
+            document.getElementById('detailModal').style.display = 'block';
+            document.getElementById('detailTitle').textContent = t('detailTitle') + ' - ' + id;
+            document.getElementById('detailContent').textContent = t('loading');
+            try {
+                const res = await fetch('/api/docker/inspect/' + id);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                document.getElementById('detailContent').textContent = JSON.stringify(await res.json(), null, 2);
+            } catch (e) { document.getElementById('detailContent').textContent = 'Error al cargar detalles'; }
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/docker/stats');
+                if (!res.ok) return;
+                (await res.json()).forEach(s => {
+                    const ce = document.getElementById('cpu-' + s.name);
+                    const me = document.getElementById('mem-' + s.name);
+                    if (ce) ce.textContent = s.cpu;
+                    if (me) me.textContent = s.memory;
+                });
+            } catch (e) {}
+        }
+
+        async function load() { await loadSystem(); await loadContainers(); await loadStats(); }
+
+        initCharts();
+        load();
+        setInterval(load, 5000);
+    </script>
+</body>
+</html>
