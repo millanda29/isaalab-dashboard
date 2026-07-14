@@ -290,18 +290,6 @@
             chart.update();
         }
 
-        function toast(msg, type) {
-            const c = document.getElementById('toastContainer');
-            const el = document.createElement('div');
-            el.className = 'toast toast-' + type;
-            el.textContent = msg;
-            c.appendChild(el);
-            setTimeout(() => { el.classList.add('toast-out'); setTimeout(() => el.remove(), 300); }, 3000);
-        }
-
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
-
         async function loadSystem() {
             try {
                 const res = await fetch('/api/system');
@@ -324,15 +312,6 @@
                 document.getElementById('serverStatus').textContent = t('offline');
                 document.getElementById('serverStatus').style.color = 'var(--red)';
             }
-        }
-
-        function updateChart(chart, val) {
-            if (!chart) return;
-            const d = chart.data.datasets[0].data;
-            d.push(val);
-            if (d.length > 20) d.shift();
-            chart.data.labels = d.map((_,i) => i);
-            chart.update();
         }
 
         async function loadContainers() {
@@ -442,19 +421,6 @@
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 document.getElementById('detailContent').textContent = JSON.stringify(await res.json(), null, 2);
             } catch (e) { document.getElementById('detailContent').textContent = 'Error al cargar detalles'; }
-        }
-
-        async function loadStats() {
-            try {
-                const res = await fetch('/api/docker/stats');
-                if (!res.ok) return;
-                (await res.json()).forEach(s => {
-                    const ce = document.getElementById('cpu-' + s.name);
-                    const me = document.getElementById('mem-' + s.name);
-                    if (ce) ce.textContent = s.cpu;
-                    if (me) me.textContent = s.memory;
-                });
-            } catch (e) {}
         }
 
         async function showNetworks() {
