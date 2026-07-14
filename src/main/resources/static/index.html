@@ -478,7 +478,7 @@
                         '</div>' +
                         '<div class="text-sm text-muted mt-1">Conectados: ' + (Object.values(containers).map(c => c.Name).join(', ') || 'Ninguno') + '</div>' +
                         '</div>';
-                });
+                }
                 document.getElementById('networkList').innerHTML = html;
             } catch (e) {
                 document.getElementById('networkList').innerHTML = '<div class="error">Error al cargar redes</div>';
