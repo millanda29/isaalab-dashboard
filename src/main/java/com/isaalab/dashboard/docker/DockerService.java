@@ -27,9 +27,10 @@ public class DockerService {
 
             while ((line = reader.readLine()) != null) {
                 String[] values = line.split("\\|");
-                if (values.length >= 5) {
+                if (values.length >= 4) {
+                    String ports = values.length >= 5 ? values[4] : "";
                     containers.add(new ContainerInfo(
-                            values[0], values[1], values[2], values[3], values[4]
+                            values[0], values[1], values[2], values[3], ports
                     ));
                 }
             }
