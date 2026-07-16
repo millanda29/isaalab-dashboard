@@ -17,6 +17,12 @@
 - 🌙 **Tema claro/oscuro** — Toggle de tema
 - 🌐 **Internacionalización** — Español / English
 - 🔐 **Autenticación básica** — Acceso seguro a la API
+- 🖥 **Control de monitor** — Encender/apagar monitor vía vbetool
+- 🔄 **Control del servidor** — Reiniciar/apagar desde el dashboard
+- ⚙ **Gestión de procesos** — Listar y matar procesos
+- 🚪 **Puertos abiertos** — Ver puertos en escucha
+- ⚡ **Servicios systemd** — Listar y reiniciar servicios
+- 🌐 **Tailscale** — IP de Tailscale en el header
 
 ## 🛠️ Tecnologías
 
@@ -62,6 +68,28 @@ http://localhost:8080
 | POST | `/api/docker/restart/{id}` | Reiniciar contenedor |
 | GET | `/api/docker/networks` | Listar redes Docker |
 | GET | `/api/docker/networks/{id}` | Inspeccionar red con contenedores conectados |
+| GET | `/api/system/ip` | IP local + Tailscale |
+| GET | `/api/system/ports` | Puertos abiertos |
+| GET | `/api/system/processes` | Lista de procesos |
+| POST | `/api/system/processes/{pid}/kill` | Matar proceso |
+| GET | `/api/system/services` | Servicios systemd |
+| POST | `/api/system/services/{name}/restart` | Reiniciar servicio |
+| POST | `/api/system/monitor/on` | Encender monitor |
+| POST | `/api/system/monitor/off` | Apagar monitor |
+| POST | `/api/system/power/reboot` | Reiniciar servidor |
+| POST | `/api/system/power/shutdown` | Apagar servidor |
+
+## ⚙️ Preparación en servidor
+
+Para que funcionen monitor on/off, reboot y shutdown:
+
+```bash
+# Editar sudoers (NOPASSWD para comandos del dashboard)
+echo "millanda29 ALL=(ALL) NOPASSWD: /usr/bin/vbetool, /sbin/shutdown, /sbin/reboot, /bin/systemctl" | sudo tee /etc/sudoers.d/isaalab
+
+# Instalar vbetool (para control de monitor)
+sudo apt install -y vbetool
+```
 
 ## 📁 Estructura
 
@@ -77,7 +105,9 @@ src/main/java/com/isaalab/dashboard/
 ├── system/
 │   ├── SystemController.java
 │   ├── SystemInfo.java
-│   └── SystemService.java
+│   ├── SystemService.java
+│   ├── PowerService.java
+│   └── ProcessService.java
 └── dashboard/DashboardController.java
 ```
 

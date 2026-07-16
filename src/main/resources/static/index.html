@@ -7,395 +7,134 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0e1a;
-            --bg-card: rgba(15, 23, 42, 0.8);
-            --border: rgba(51, 65, 85, 0.5);
-            --text: #e2e8f0;
-            --text-muted: #64748b;
-            --accent: #38bdf8;
-            --green: #4ade80;
-            --yellow: #facc15;
-            --red: #f87171;
-            --purple: #a78bfa;
-            --glass: rgba(255, 255, 255, 0.03);
-            --shadow: 0 8px 32px rgba(0,0,0,0.3);
-            --radius: 1.25rem;
+            --bg: #0a0e1a; --bg-card: rgba(15,23,42,0.8); --border: rgba(51,65,85,0.5);
+            --text: #e2e8f0; --text-muted: #64748b; --accent: #38bdf8;
+            --green: #4ade80; --yellow: #facc15; --red: #f87171; --purple: #a78bfa;
+            --glass: rgba(255,255,255,0.03); --shadow: 0 8px 32px rgba(0,0,0,0.3); --radius: 1.25rem;
         }
         .light {
-            --bg: #f0f4f8;
-            --bg-card: rgba(255, 255, 255, 0.85);
-            --border: rgba(203, 213, 225, 0.6);
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --glass: rgba(0, 0, 0, 0.02);
-            --shadow: 0 8px 32px rgba(0,0,0,0.06);
+            --bg: #f0f4f8; --bg-card: rgba(255,255,255,0.85); --border: rgba(203,213,225,0.6);
+            --text: #0f172a; --text-muted: #64748b; --glass: rgba(0,0,0,0.02); --shadow: 0 8px 32px rgba(0,0,0,0.06);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 1.5rem;
-            min-height: 100vh;
-            transition: background 0.4s, color 0.4s;
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); padding:1.5rem; min-height:100vh; transition:background 0.4s,color 0.4s; }
+        .header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem; padding:1.25rem 1.75rem; background:var(--bg-card); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); }
+        .header-left h1 { font-size:1.5rem; font-weight:800; background:linear-gradient(135deg,#38bdf8,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:-0.02em; }
+        .header-left .subtitle { font-size:0.85rem; color:var(--text-muted); margin-top:0.15rem; }
+        .header-right { display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; }
+        .chip { padding:0.4rem 1rem; border-radius:9999px; font-size:0.8rem; font-weight:600; background:var(--glass); border:1px solid var(--border); color:var(--text-muted); display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer; }
+        .chip:hover { border-color:var(--accent); }
+        .chip .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+        .chip .dot.green { background:var(--green); box-shadow:0 0 8px var(--green); }
+        .chip .dot.red { background:var(--red); box-shadow:0 0 8px var(--red); }
+
+        .tabs { display:flex; gap:0.35rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+        .tab { padding:0.6rem 1.25rem; border-radius:2rem; font-size:0.85rem; font-weight:600; cursor:pointer; background:var(--glass); border:1px solid var(--border); color:var(--text-muted); transition:all 0.2s; }
+        .tab:hover { border-color:var(--accent); color:var(--text); }
+        .tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        .gauges { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.25rem; margin-bottom:1.5rem; }
+        .gauge-card { background:var(--bg-card); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem 1.25rem; box-shadow:var(--shadow); text-align:center; transition:transform 0.3s,border-color 0.3s; }
+        .gauge-card:hover { transform:translateY(-4px); border-color:var(--accent); }
+        .gauge-card .label { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.75rem; }
+        .gauge-svg { width:120px; height:120px; margin:0 auto 0.75rem; }
+        .gauge-svg .bg-circle { fill:none; stroke:var(--border); stroke-width:8; }
+        .gauge-svg .progress-circle { fill:none; stroke-width:8; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%; transition:stroke-dashoffset 1s ease; }
+        .gauge-svg .center-text { font-size:1.5rem; font-weight:800; fill:var(--text); dominant-baseline:central; text-anchor:middle; }
+        .gauge-svg .center-label { font-size:0.6rem; fill:var(--text-muted); dominant-baseline:central; text-anchor:middle; }
+        .gauge-card .detail { font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem; }
+
+        .section-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1rem; }
+        .section-header h2 { font-size:1.1rem; font-weight:700; color:var(--text); }
+        .search-box { background:var(--bg-card); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:2rem; padding:0.6rem 1.25rem; color:var(--text); font-size:0.85rem; min-width:220px; outline:none; transition:border-color 0.3s; }
+        .search-box:focus { border-color:var(--accent); }
+        .search-box::placeholder { color:var(--text-muted); }
+
+        .btn { padding:0.5rem 1rem; border:none; border-radius:2rem; cursor:pointer; font-size:0.8rem; font-weight:600; transition:all 0.2s; background:var(--bg-card); backdrop-filter:blur(12px); border:1px solid var(--border); color:var(--text); }
+        .btn:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-1px); }
+        .btn-primary { background:linear-gradient(135deg,#38bdf8,#818cf8); color:#fff; border:none; }
+        .btn-primary:hover { opacity:0.9; color:#fff; }
+        .btn-danger { background:linear-gradient(135deg,#f87171,#ef4444); color:#fff; border:none; }
+        .btn-danger:hover { opacity:0.9; color:#fff; }
+        .btn-warning { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#1e293b; border:none; }
+        .btn-warning:hover { opacity:0.9; }
+
+        .table-wrap { background:var(--bg-card); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; }
+        th { padding:0.9rem 1rem; text-align:left; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); background:var(--glass); border-bottom:1px solid var(--border); }
+        td { padding:0.8rem 1rem; font-size:0.85rem; border-bottom:1px solid var(--border); color:var(--text); }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:var(--glass); }
+        .table-wrap pre { background:rgba(0,0,0,0.3); padding:1rem; border-radius:0.75rem; overflow-x:auto; font-size:0.78rem; color:var(--text); max-height:60vh; overflow-y:auto; font-family:'JetBrains Mono','Fira Code',monospace; margin:1rem; }
+
+        .badge { display:inline-flex; align-items:center; gap:0.35rem; padding:0.2rem 0.7rem; border-radius:9999px; font-size:0.7rem; font-weight:600; }
+        .badge-up { background:rgba(74,222,128,0.15); color:var(--green); }
+        .badge-exited { background:rgba(248,113,113,0.15); color:var(--red); }
+        .badge-paused { background:rgba(250,204,21,0.15); color:var(--yellow); }
+
+        .action-group { display:flex; gap:0.35rem; flex-wrap:wrap; }
+        .action-btn { padding:0.3rem 0.6rem; border:none; border-radius:0.5rem; cursor:pointer; font-size:0.7rem; font-weight:600; transition:all 0.2s; }
+        .action-btn.logs { background:rgba(59,130,246,0.2); color:#60a5fa; }
+        .action-btn.details { background:rgba(139,92,246,0.2); color:#a78bfa; }
+        .action-btn.start { background:rgba(74,222,128,0.2); color:var(--green); }
+        .action-btn.stop { background:rgba(248,113,113,0.2); color:var(--red); }
+        .action-btn.restart { background:rgba(245,158,11,0.2); color:#fbbf24; }
+        .action-btn.danger { background:rgba(239,68,68,0.2); color:var(--red); }
+        .action-btn:hover { filter:brightness(1.3); transform:translateY(-1px); }
+
+        .monitor-actions { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+        .monitor-card { background:var(--bg-card); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow); text-align:center; flex:1; min-width:180px; }
+        .monitor-card .icon { font-size:2.5rem; margin-bottom:0.5rem; }
+        .monitor-card .title { font-size:0.85rem; font-weight:600; margin-bottom:0.75rem; color:var(--text-muted); }
+        .monitor-card .btn { width:100%; padding:0.75rem; font-size:0.9rem; }
+
+        .loading { color:var(--text-muted); text-align:center; padding:3rem; }
+        .error { color:var(--red); text-align:center; padding:2rem; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:1000; animation:fadeIn 0.2s ease; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .modal-content { background:var(--bg-card); backdrop-filter:blur(16px); margin:3% auto; padding:1.75rem; width:92%; max-width:860px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); max-height:82vh; overflow-y:auto; animation:slideUp 0.3s ease; }
+        @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .modal-content pre { background:rgba(0,0,0,0.3); padding:1rem; border-radius:0.75rem; overflow-x:auto; font-size:0.78rem; color:var(--text); max-height:55vh; overflow-y:auto; font-family:'JetBrains Mono','Fira Code',monospace; }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem; }
+        .modal-header h3 { font-size:1.1rem; font-weight:700; color:var(--text); }
+        .close { font-size:1.5rem; cursor:pointer; color:var(--text-muted); transition:color 0.2s; line-height:1; }
+        .close:hover { color:var(--text); }
+
+        .toast-container { position:fixed; top:1.25rem; right:1.25rem; z-index:9999; display:flex; flex-direction:column; gap:0.5rem; }
+        .toast { padding:0.75rem 1.25rem; border-radius:0.75rem; font-size:0.85rem; font-weight:500; backdrop-filter:blur(12px); animation:slideIn 0.3s ease; max-width:360px; border:1px solid; }
+        .toast-success { background:rgba(74,222,128,0.15); color:var(--green); border-color:rgba(74,222,128,0.3); }
+        .toast-error { background:rgba(248,113,113,0.15); color:var(--red); border-color:rgba(248,113,113,0.3); }
+        .toast-info { background:rgba(56,189,248,0.15); color:var(--accent); border-color:rgba(56,189,248,0.3); }
+        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+        .toast-out { animation:slideOut 0.3s ease forwards; }
+        @keyframes slideOut { from{transform:translateX(0);opacity:1} to{transform:translateX(100%);opacity:0} }
+
+        .status-up { color:var(--green); }
+        .status-exited { color:var(--red); }
+        .status-paused { color:var(--yellow); }
+        .process-high-cpu { color:var(--red); font-weight:700; }
+        .text-mono { font-family:'JetBrains Mono','Fira Code',monospace; font-size:0.8rem; }
+
+        @media (max-width:768px) {
+            body { padding:0.75rem; }
+            .header { padding:1rem; }
+            .header-left h1 { font-size:1.2rem; }
+            .gauges { grid-template-columns:repeat(2,1fr); gap:0.75rem; }
+            .gauge-card { padding:1rem 0.75rem; }
+            .gauge-svg { width:90px; height:90px; }
+            .gauge-svg .center-text { font-size:1.1rem; }
+            th,td { padding:0.6rem 0.75rem; font-size:0.75rem; }
+            .modal-content { width:95%; margin:10% auto; padding:1.25rem; }
+            .tabs { gap:0.25rem; }
+            .tab { padding:0.4rem 0.9rem; font-size:0.75rem; }
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding: 1.25rem 1.75rem;
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-        .header-left h1 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #38bdf8, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.02em;
-        }
-        .header-left .subtitle {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 0.15rem;
-        }
-        .header-right {
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .chip {
-            padding: 0.4rem 1rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-        .chip .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .chip .dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); }
-        .chip .dot.red { background: var(--red); box-shadow: 0 0 8px var(--red); }
-        .gauges {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.25rem;
-            margin-bottom: 2rem;
-        }
-        .gauge-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem 1.25rem;
-            box-shadow: var(--shadow);
-            text-align: center;
-            transition: transform 0.3s, border-color 0.3s;
-        }
-        .gauge-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent);
-        }
-        .gauge-card .label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            margin-bottom: 0.75rem;
-        }
-        .gauge-svg {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 0.75rem;
-        }
-        .gauge-svg .bg-circle { fill: none; stroke: var(--border); stroke-width: 8; }
-        .gauge-svg .progress-circle {
-            fill: none;
-            stroke-width: 8;
-            stroke-linecap: round;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-            transition: stroke-dashoffset 1s ease;
-        }
-        .gauge-svg .center-text {
-            font-size: 1.5rem;
-            font-weight: 800;
-            fill: var(--text);
-            dominant-baseline: central;
-            text-anchor: middle;
-        }
-        .gauge-svg .center-label {
-            font-size: 0.6rem;
-            fill: var(--text-muted);
-            dominant-baseline: central;
-            text-anchor: middle;
-        }
-        .progress-circle.green { stroke: var(--green); }
-        .progress-circle.yellow { stroke: var(--yellow); }
-        .progress-circle.red { stroke: var(--red); }
-        .progress-circle.blue { stroke: var(--accent); }
-        .progress-circle.purple { stroke: var(--purple); }
-        .gauge-card .detail {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-        .gauge-card .sub-bar {
-            margin-top: 0.5rem;
-            height: 4px;
-            border-radius: 2px;
-            background: var(--border);
-            overflow: hidden;
-        }
-        .gauge-card .sub-bar-fill {
-            height: 100%;
-            border-radius: 2px;
-            transition: width 1s ease;
-        }
-        .gauge-card .sub-bar-fill.green { background: var(--green); }
-        .gauge-card .sub-bar-fill.yellow { background: var(--yellow); }
-        .gauge-card .sub-bar-fill.red { background: var(--red); }
-        .uptime-text { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-        .section-header h2 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-        .search-box {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: 2rem;
-            padding: 0.6rem 1.25rem;
-            color: var(--text);
-            font-size: 0.85rem;
-            min-width: 220px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .search-box:focus { border-color: var(--accent); }
-        .search-box::placeholder { color: var(--text-muted); }
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 2rem;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-        .btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
-        .btn-primary { background: linear-gradient(135deg, #38bdf8, #818cf8); color: #fff; border: none; }
-        .btn-primary:hover { opacity: 0.9; color: #fff; }
-        .table-wrap {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            overflow-x: auto;
-        }
-        table { width: 100%; border-collapse: collapse; }
-        th {
-            padding: 0.9rem 1rem;
-            text-align: left;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-muted);
-            background: var(--glass);
-            border-bottom: 1px solid var(--border);
-        }
-        td {
-            padding: 0.8rem 1rem;
-            font-size: 0.85rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--text);
-        }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: var(--glass); }
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.2rem 0.7rem;
-            border-radius: 9999px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        .badge-up { background: rgba(74, 222, 128, 0.15); color: var(--green); }
-        .badge-exited { background: rgba(248, 113, 113, 0.15); color: var(--red); }
-        .badge-paused { background: rgba(250, 204, 21, 0.15); color: var(--yellow); }
-        .action-group { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-        .action-btn {
-            padding: 0.3rem 0.6rem;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.7rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .action-btn.logs { background: rgba(59,130,246,0.2); color: #60a5fa; }
-        .action-btn.details { background: rgba(139,92,246,0.2); color: #a78bfa; }
-        .action-btn.start { background: rgba(74,222,128,0.2); color: var(--green); }
-        .action-btn.stop { background: rgba(248,113,113,0.2); color: var(--red); }
-        .action-btn.restart { background: rgba(245,158,11,0.2); color: #fbbf24; }
-        .action-btn:hover { filter: brightness(1.3); transform: translateY(-1px); }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            animation: fadeIn 0.2s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-content {
-            background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            margin: 3% auto;
-            padding: 1.75rem;
-            width: 92%;
-            max-width: 860px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            max-height: 82vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .modal-content pre {
-            background: rgba(0,0,0,0.3);
-            padding: 1rem;
-            border-radius: 0.75rem;
-            overflow-x: auto;
-            font-size: 0.78rem;
-            color: var(--text);
-            max-height: 55vh;
-            overflow-y: auto;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .modal-header h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-        .close {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: color 0.2s;
-            line-height: 1;
-        }
-        .close:hover { color: var(--text); }
-        .toast-container {
-            position: fixed;
-            top: 1.25rem;
-            right: 1.25rem;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .toast {
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.75rem;
-            font-size: 0.85rem;
-            font-weight: 500;
-            backdrop-filter: blur(12px);
-            animation: slideIn 0.3s ease;
-            max-width: 360px;
-            border: 1px solid;
-        }
-        .toast-success { background: rgba(74,222,128,0.15); color: var(--green); border-color: rgba(74,222,128,0.3); }
-        .toast-error { background: rgba(248,113,113,0.15); color: var(--red); border-color: rgba(248,113,113,0.3); }
-        .toast-info { background: rgba(56,189,248,0.15); color: var(--accent); border-color: rgba(56,189,248,0.3); }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .toast-out { animation: slideOut 0.3s ease forwards; }
-        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-        .status-up { color: var(--green); }
-        .status-exited { color: var(--red); }
-        .status-paused { color: var(--yellow); }
-        .loading { color: var(--text-muted); text-align: center; padding: 3rem; }
-        .error { color: var(--red); text-align: center; padding: 2rem; }
-        .network-card {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1rem 1.25rem;
-            margin-bottom: 0.75rem;
-            transition: border-color 0.2s;
-        }
-        .network-card:hover { border-color: var(--accent); }
-        .network-card .net-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .network-card .net-name { font-weight: 600; font-size: 0.9rem; }
-        .network-card .net-driver { font-size: 0.75rem; color: var(--text-muted); }
-        .network-card .net-containers { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem; }
-        @media (max-width: 768px) {
-            body { padding: 0.75rem; }
-            .header { padding: 1rem; }
-            .header-left h1 { font-size: 1.2rem; }
-            .gauges { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-            .gauge-card { padding: 1rem 0.75rem; }
-            .gauge-svg { width: 90px; height: 90px; }
-            .gauge-svg .center-text { font-size: 1.1rem; }
-            th, td { padding: 0.6rem 0.75rem; font-size: 0.75rem; }
-            .modal-content { width: 95%; margin: 10% auto; padding: 1.25rem; }
-            .action-btn { padding: 0.25rem 0.5rem; font-size: 0.65rem; }
-        }
-        @media (max-width: 480px) {
-            .gauges { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-            .gauge-svg { width: 75px; height: 75px; }
-            .gauge-svg .center-text { font-size: 0.95rem; }
-            .section-header { flex-direction: column; align-items: stretch; }
-            .search-box { width: 100%; }
-        }
-        @media (max-width: 380px) {
-            .gauges { grid-template-columns: 1fr; }
+        @media (max-width:480px) {
+            .gauges { grid-template-columns:1fr 1fr; gap:0.5rem; }
+            .gauge-svg { width:75px; height:75px; }
+            .monitor-actions { flex-direction:column; }
         }
     </style>
 </head>
@@ -406,365 +145,501 @@
             <h1>⚡ ISAALAB</h1>
             <div class="subtitle">
                 <span id="serverIp" style="font-family:monospace;">Cargando...</span>
-                <span style="margin:0 0.5rem">·</span>
+                <span id="tailscaleIp" style="font-family:monospace;color:var(--purple);"></span>
+                <span style="margin:0 0.4rem">·</span>
                 <span id="serverStatus">Conectando...</span>
             </div>
         </div>
         <div class="header-right">
-            <span class="chip" id="langBtn" onclick="toggleLang()" style="cursor:pointer;">🇪🇸 ES</span>
-            <span class="chip" id="themeBtn" onclick="toggleTheme()" style="cursor:pointer;">🌙</span>
+            <span class="chip" id="langBtn" onclick="toggleLang()">🇪🇸 ES</span>
+            <span class="chip" id="themeBtn" onclick="toggleTheme()">🌙</span>
         </div>
     </div>
 
-    <div class="gauges" id="gauges">
-        <div class="gauge-card">
-            <div class="label" data-i18n="cpu">CPU</div>
-            <svg class="gauge-svg" viewBox="0 0 120 120">
-                <circle class="bg-circle" cx="60" cy="60" r="48"/>
-                <circle class="progress-circle blue" id="cpuCircle" cx="60" cy="60" r="48"
-                    stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
-                <text class="center-text" id="cpuText" x="60" y="52">0%</text>
-                <text class="center-label" x="60" y="70">USO</text>
-            </svg>
-            <div class="detail" id="cpuDetail"></div>
-        </div>
-        <div class="gauge-card">
-            <div class="label" data-i18n="ram">RAM</div>
-            <svg class="gauge-svg" viewBox="0 0 120 120">
-                <circle class="bg-circle" cx="60" cy="60" r="48"/>
-                <circle class="progress-circle green" id="memCircle" cx="60" cy="60" r="48"
-                    stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
-                <text class="center-text" id="memText" x="60" y="52">0%</text>
-                <text class="center-label" x="60" y="70">USO</text>
-            </svg>
-            <div class="detail" id="memDetail"></div>
-        </div>
-        <div class="gauge-card">
-            <div class="label" data-i18n="disk">DISCO</div>
-            <svg class="gauge-svg" viewBox="0 0 120 120">
-                <circle class="bg-circle" cx="60" cy="60" r="48"/>
-                <circle class="progress-circle purple" id="diskCircle" cx="60" cy="60" r="48"
-                    stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
-                <text class="center-text" id="diskText" x="60" y="52">0%</text>
-                <text class="center-label" x="60" y="70">USO</text>
-            </svg>
-            <div class="detail" id="diskDetail"></div>
-        </div>
-        <div class="gauge-card">
-            <div class="label">UPTIME</div>
-            <svg class="gauge-svg" viewBox="0 0 120 120">
-                <circle class="bg-circle" cx="60" cy="60" r="48"/>
-                <circle class="progress-circle" id="uptimeCircle" cx="60" cy="60" r="48"
-                    stroke-dasharray="301.6" stroke-dashoffset="0" style="stroke:#a78bfa;"/>
-                <text class="center-text" id="uptimeText" x="60" y="52" style="font-size:0.9rem;">0h</text>
-                <text class="center-label" x="60" y="70">ACTIVO</text>
-            </svg>
-            <div class="detail" id="uptimeDetail"></div>
-        </div>
+    <div class="tabs" id="tabs">
+        <div class="tab active" data-tab="resumen" onclick="switchTab('resumen')">📊 Resumen</div>
+        <div class="tab" data-tab="monitor" onclick="switchTab('monitor')">🖥 Monitor</div>
+        <div class="tab" data-tab="procesos" onclick="switchTab('procesos')">⚙ Procesos</div>
+        <div class="tab" data-tab="puertos" onclick="switchTab('puertos')">🚪 Puertos</div>
+        <div class="tab" data-tab="servicios" onclick="switchTab('servicios')">⚡ Servicios</div>
     </div>
 
-    <div class="section-header">
-        <h2 data-i18n="containers">🐳 Contenedores</h2>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-            <input type="text" class="search-box" id="searchInput" placeholder="🔍 Buscar..." oninput="filterContainers()">
-            <button class="btn btn-primary" onclick="showNetworks()">🌐 Redes</button>
-        </div>
-    </div>
-
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th data-i18n="name">Nombre</th>
-                    <th data-i18n="image">Imagen</th>
-                    <th data-i18n="statusCol">Estado</th>
-                    <th data-i18n="ports">Puertos</th>
-                    <th>CPU</th>
-                    <th>RAM</th>
-                    <th data-i18n="actions">Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="containers">
-                <tr><td colspan="8" class="loading" data-i18n="loading">Cargando...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div id="logModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="logTitle">📋 Logs</h3>
-                <span class="close" onclick="closeModal('logModal')">&times;</span>
+    <div id="tab-resumen" class="tab-content active">
+        <div class="gauges" id="gauges">
+            <div class="gauge-card"><div class="label" data-i18n="cpu">CPU</div>
+                <svg class="gauge-svg" viewBox="0 0 120 120">
+                    <circle class="bg-circle" cx="60" cy="60" r="48"/>
+                    <circle class="progress-circle blue" id="cpuCircle" cx="60" cy="60" r="48" stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
+                    <text class="center-text" id="cpuText" x="60" y="52">0%</text>
+                    <text class="center-label" x="60" y="70">USO</text>
+                </svg>
+                <div class="detail" id="cpuDetail"></div>
             </div>
-            <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
-                <button class="btn btn-primary" onclick="downloadLogs()">⬇ Descargar</button>
-                <button class="btn" onclick="loadMoreLogs()" data-i18n="loadMore">+ Cargar más</button>
+            <div class="gauge-card"><div class="label" data-i18n="ram">RAM</div>
+                <svg class="gauge-svg" viewBox="0 0 120 120">
+                    <circle class="bg-circle" cx="60" cy="60" r="48"/>
+                    <circle class="progress-circle green" id="memCircle" cx="60" cy="60" r="48" stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
+                    <text class="center-text" id="memText" x="60" y="52">0%</text>
+                    <text class="center-label" x="60" y="70">USO</text>
+                </svg>
+                <div class="detail" id="memDetail"></div>
             </div>
-            <pre id="logContent">Cargando...</pre>
+            <div class="gauge-card"><div class="label" data-i18n="disk">DISCO</div>
+                <svg class="gauge-svg" viewBox="0 0 120 120">
+                    <circle class="bg-circle" cx="60" cy="60" r="48"/>
+                    <circle class="progress-circle purple" id="diskCircle" cx="60" cy="60" r="48" stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
+                    <text class="center-text" id="diskText" x="60" y="52">0%</text>
+                    <text class="center-label" x="60" y="70">USO</text>
+                </svg>
+                <div class="detail" id="diskDetail"></div>
+            </div>
+            <div class="gauge-card"><div class="label">UPTIME</div>
+                <svg class="gauge-svg" viewBox="0 0 120 120">
+                    <circle class="bg-circle" cx="60" cy="60" r="48"/>
+                    <circle class="progress-circle" id="uptimeCircle" cx="60" cy="60" r="48" stroke-dasharray="301.6" stroke-dashoffset="0" style="stroke:#a78bfa;"/>
+                    <text class="center-text" id="uptimeText" x="60" y="52" style="font-size:0.9rem;">0h</text>
+                    <text class="center-label" x="60" y="70">ACTIVO</text>
+                </svg>
+                <div class="detail" id="uptimeDetail"></div>
+            </div>
+        </div>
+        <div class="section-header">
+            <h2 data-i18n="containers">🐳 Contenedores</h2>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <input type="text" class="search-box" id="searchInput" placeholder="🔍 Buscar..." oninput="filterContainers()">
+                <button class="btn btn-primary" onclick="showNetworks()">🌐 Redes</button>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr>
+                    <th></th><th data-i18n="name">Nombre</th><th data-i18n="image">Imagen</th>
+                    <th data-i18n="statusCol">Estado</th><th data-i18n="ports">Puertos</th>
+                    <th>CPU</th><th>RAM</th><th data-i18n="actions">Acciones</th>
+                </tr></thead>
+                <tbody id="containers"><tr><td colspan="8" class="loading" data-i18n="loading">Cargando...</td></tr></tbody>
+            </table>
         </div>
     </div>
 
-    <div id="detailModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="detailTitle">📦 Detalles</h3>
-                <span class="close" onclick="closeModal('detailModal')">&times;</span>
+    <div id="tab-monitor" class="tab-content">
+        <div class="monitor-actions">
+            <div class="monitor-card">
+                <div class="icon">🖥</div>
+                <div class="title">Monitor</div>
+                <div style="display:flex;gap:0.5rem;">
+                    <button class="btn btn-primary" onclick="monitorOn()">🔛 Encender</button>
+                    <button class="btn btn-warning" onclick="monitorOff()">🔴 Apagar</button>
+                </div>
+                <div class="detail" style="margin-top:0.5rem;" id="monitorStatus">Estado: —</div>
             </div>
-            <pre id="detailContent">Cargando...</pre>
+            <div class="monitor-card">
+                <div class="icon">🔄</div>
+                <div class="title">Sistema</div>
+                <div style="display:flex;gap:0.5rem;">
+                    <button class="btn btn-warning" onclick="powerAction('reboot')">🔄 Reiniciar</button>
+                    <button class="btn btn-danger" onclick="powerAction('shutdown')">⏻ Apagar</button>
+                </div>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <pre id="powerLog" style="margin:0;border-radius:0;background:var(--glass);">Resultados de comandos aparecerán aquí...</pre>
         </div>
     </div>
 
-    <div id="networkModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="networkTitle">🌐 Redes Docker</h3>
-                <span class="close" onclick="closeModal('networkModal')">&times;</span>
+    <div id="tab-procesos" class="tab-content">
+        <div class="section-header">
+            <h2>⚙ Procesos</h2>
+            <div style="display:flex;gap:0.5rem;">
+                <button class="btn btn-primary" onclick="loadProcesses()">🔄 Recargar</button>
             </div>
-            <div id="networkList">Cargando...</div>
+        </div>
+        <div class="table-wrap">
+            <div style="max-height:70vh;overflow-y:auto;">
+                <table>
+                    <thead><tr>
+                        <th>PID</th><th>Usuario</th><th>CPU%</th><th>MEM%</th>
+                        <th>Comando</th><th>Acción</th>
+                    </tr></thead>
+                    <tbody id="procesosBody"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody>
+                </table>
+            </div>
         </div>
     </div>
+
+    <div id="tab-puertos" class="tab-content">
+        <div class="section-header">
+            <h2>🚪 Puertos abiertos</h2>
+            <button class="btn btn-primary" onclick="loadPorts()">🔄 Recargar</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Proto</th><th>Local</th><th>Peer</th><th>Proceso</th></tr></thead>
+                <tbody id="puertosBody"><tr><td colspan="4" class="loading">Cargando...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-servicios" class="tab-content">
+        <div class="section-header">
+            <h2>⚡ Servicios systemd</h2>
+            <button class="btn btn-primary" onclick="loadServices()">🔄 Recargar</button>
+        </div>
+        <div class="table-wrap">
+            <div style="max-height:70vh;overflow-y:auto;">
+                <table>
+                    <thead><tr><th>Servicio</th><th>Activo</th><th>Sub</th><th>Acción</th></tr></thead>
+                    <tbody id="serviciosBody"><tr><td colspan="4" class="loading">Cargando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="logModal" class="modal"><div class="modal-content">
+        <div class="modal-header"><h3 id="logTitle">📋 Logs</h3><span class="close" onclick="closeModal('logModal')">&times;</span></div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="downloadLogs()">⬇ Descargar</button>
+            <button class="btn" onclick="loadMoreLogs()" data-i18n="loadMore">+ Cargar más</button>
+        </div>
+        <pre id="logContent">Cargando...</pre>
+    </div></div>
+    <div id="detailModal" class="modal"><div class="modal-content">
+        <div class="modal-header"><h3 id="detailTitle">📦 Detalles</h3><span class="close" onclick="closeModal('detailModal')">&times;</span></div>
+        <pre id="detailContent">Cargando...</pre>
+    </div></div>
+    <div id="networkModal" class="modal"><div class="modal-content">
+        <div class="modal-header"><h3 id="networkTitle">🌐 Redes Docker</h3><span class="close" onclick="closeModal('networkModal')">&times;</span></div>
+        <div id="networkList">Cargando...</div>
+    </div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script>
         const i18n = {
-            es: { cpu:'CPU', ram:'RAM', disk:'DISCO', containers:'🐳 Contenedores', name:'Nombre', image:'Imagen', statusCol:'Estado', ports:'Puertos', cpuCol:'CPU', ramCol:'RAM', actions:'Acciones', loading:'Cargando...', error:'Error', online:'🟢 En línea', offline:'🔴 Fuera de línea', restart:'Reiniciar', start:'Iniciar', stop:'Detener', logs:'Logs', details:'Detalles', loadMore:'+ Cargar más', search:'🔍 Buscar...', confirmRestart:'¿Reiniciar', confirmStart:'¿Iniciar', confirmStop:'¿Detener', logTitle:'📋 Logs', detailTitle:'📦 Detalles', networkTitle:'🌐 Redes Docker', noContainers:'Sin contenedores' },
-            en: { cpu:'CPU', ram:'RAM', disk:'DISK', containers:'🐳 Containers', name:'Name', image:'Image', statusCol:'Status', ports:'Ports', cpuCol:'CPU', ramCol:'RAM', actions:'Actions', loading:'Loading...', error:'Error', online:'🟢 Online', offline:'🔴 Offline', restart:'Restart', start:'Start', stop:'Stop', logs:'Logs', details:'Details', loadMore:'+ Load more', search:'🔍 Search...', confirmRestart:'Restart', confirmStart:'Start', confirmStop:'Stop', logTitle:'📋 Logs', detailTitle:'📦 Details', networkTitle:'🌐 Docker Networks', noContainers:'No containers' }
+            es:{cpu:'CPU',ram:'RAM',disk:'DISCO',containers:'🐳 Contenedores',name:'Nombre',image:'Imagen',statusCol:'Estado',ports:'Puertos',actions:'Acciones',loading:'Cargando...',error:'Error',online:'🟢 En línea',offline:'🔴 Fuera de línea',restart:'Reiniciar',start:'Iniciar',stop:'Detener',logs:'Logs',details:'Detalles',loadMore:'+ Cargar más',search:'🔍 Buscar...',confirmRestart:'¿Reiniciar',confirmStart:'¿Iniciar',confirmStop:'¿Detener',logTitle:'📋 Logs',detailTitle:'📦 Detalles',networkTitle:'🌐 Redes Docker',noContainers:'Sin contenedores'},
+            en:{cpu:'CPU',ram:'RAM',disk:'DISK',containers:'🐳 Containers',name:'Name',image:'Image',statusCol:'Status',ports:'Ports',actions:'Actions',loading:'Loading...',error:'Error',online:'🟢 Online',offline:'🔴 Offline',restart:'Restart',start:'Start',stop:'Stop',logs:'Logs',details:'Details',loadMore:'+ Load more',search:'🔍 Search...',confirmRestart:'Restart',confirmStart:'Start',confirmStop:'Stop',logTitle:'📋 Logs',detailTitle:'📦 Details',networkTitle:'🌐 Docker Networks',noContainers:'No containers'}
         };
-        let currentLang = 'es', logTail = 50, currentLogId = null;
-        let cpuChart = null, memChart = null;
+        let currentLang='es',logTail=50,currentLogId=null,cpuChart=null,memChart=null;
 
-        function t(k) { return i18n[currentLang][k] || k; }
+        function t(k){return i18n[currentLang][k]||k}
 
-        function toggleLang() {
-            currentLang = currentLang === 'es' ? 'en' : 'es';
-            document.getElementById('langBtn').textContent = currentLang === 'es' ? '🇪🇸 ES' : '🇬🇧 EN';
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const k = el.dataset.i18n;
-                if (el.tagName === 'INPUT' && el.placeholder) el.placeholder = t(k);
-                else el.textContent = t(k);
+        function toggleLang(){
+            currentLang=currentLang==='es'?'en':'es';
+            document.getElementById('langBtn').textContent=currentLang==='es'?'🇪🇸 ES':'🇬🇧 EN';
+            document.querySelectorAll('[data-i18n]').forEach(el=>{
+                const k=el.dataset.i18n;
+                if(el.tagName==='INPUT'&&el.placeholder)el.placeholder=t(k);
+                else el.textContent=t(k);
             });
         }
-
-        function toggleTheme() {
+        function toggleTheme(){
             document.body.classList.toggle('light');
-            document.getElementById('themeBtn').textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+            document.getElementById('themeBtn').textContent=document.body.classList.contains('light')?'☀️':'🌙';
         }
-
-        function toast(msg, type) {
-            const c = document.getElementById('toastContainer');
-            const el = document.createElement('div');
-            el.className = 'toast toast-' + type;
-            el.textContent = msg;
+        function toast(msg,type){
+            const c=document.getElementById('toastContainer');
+            const el=document.createElement('div');
+            el.className='toast toast-'+type;el.textContent=msg;
             c.appendChild(el);
-            setTimeout(() => { el.classList.add('toast-out'); setTimeout(() => el.remove(), 300); }, 3000);
+            setTimeout(()=>{el.classList.add('toast-out');setTimeout(()=>el.remove(),300)},3000);
+        }
+        function closeModal(id){document.getElementById(id).style.display='none'}
+        window.onclick=function(e){if(e.target.classList.contains('modal'))e.target.style.display='none'}
+
+        function switchTab(id){
+            document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
+            document.querySelectorAll('.tab-content').forEach(t=>t.classList.toggle('active',t.id==='tab-'+id));
+            if(id==='procesos')loadProcesses();
+            if(id==='puertos')loadPorts();
+            if(id==='servicios')loadServices();
         }
 
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
-
-        function setGauge(circleId, textId, percent, color) {
-            const circle = document.getElementById(circleId);
-            const text = document.getElementById(textId);
-            const circumference = 301.6;
-            const offset = circumference - (percent / 100) * circumference;
-            circle.style.strokeDashoffset = offset;
-            circle.style.stroke = color;
-            text.textContent = percent.toFixed(1) + '%';
+        function setGauge(circleId,textId,percent,color){
+            const circle=document.getElementById(circleId);
+            document.getElementById(textId).textContent=percent.toFixed(1)+'%';
+            circle.style.strokeDashoffset=301.6-(percent/100)*301.6;
+            circle.style.stroke=color;
         }
 
-        async function loadSystem() {
-            try {
-                const res = await fetch('/api/system');
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const info = await res.json();
-                if (info.error) throw new Error(info.error);
-                const cpu = info.cpuPercent, mem = info.memoryPercent, disk = info.diskPercent;
-                setGauge('cpuCircle', 'cpuText', cpu, cpu > 80 ? '#f87171' : cpu > 50 ? '#facc15' : '#38bdf8');
-                setGauge('memCircle', 'memText', mem, mem > 80 ? '#f87171' : mem > 50 ? '#facc15' : '#4ade80');
-                setGauge('diskCircle', 'diskText', disk, disk > 80 ? '#f87171' : disk > 50 ? '#facc15' : '#a78bfa');
-                document.getElementById('uptimeText').textContent = info.uptime.split(' ')[0] + (info.uptime.includes('hour') || info.uptime.includes('hora') ? 'h' : 'd');
-                const dUsed = (info.diskUsed / 1073741824).toFixed(1);
-                const dTotal = (info.diskTotal / 1073741824).toFixed(1);
-                document.getElementById('cpuDetail').textContent = cpu.toFixed(1) + '%';
-                document.getElementById('memDetail').textContent = (info.memoryUsed / 1073741824).toFixed(1) + 'G / ' + (info.memoryTotal / 1073741824).toFixed(1) + 'G';
-                document.getElementById('diskDetail').textContent = dUsed + 'G / ' + dTotal + 'G';
-                document.getElementById('uptimeDetail').textContent = info.uptime;
-                document.getElementById('serverStatus').innerHTML = t('online');
-                if (cpuChart) updateChart(cpuChart, cpu);
-                if (memChart) updateChart(memChart, mem);
-            } catch (e) {
-                document.getElementById('serverStatus').innerHTML = t('offline');
-            }
+        async function loadSystem(){
+            try{
+                const res=await fetch('/api/system');
+                if(!res.ok)throw new Error('HTTP '+res.status);
+                const info=await res.json();
+                if(info.error)throw new Error(info.error);
+                const cpu=info.cpuPercent,mem=info.memoryPercent,disk=info.diskPercent;
+                setGauge('cpuCircle','cpuText',cpu,cpu>80?'#f87171':cpu>50?'#facc15':'#38bdf8');
+                setGauge('memCircle','memText',mem,mem>80?'#f87171':mem>50?'#facc15':'#4ade80');
+                setGauge('diskCircle','diskText',disk,disk>80?'#f87171':disk>50?'#facc15':'#a78bfa');
+                document.getElementById('uptimeText').textContent=info.uptime.split(' ')[0]+(info.uptime.includes('hour')||info.uptime.includes('hora')?'h':'d');
+                const dUsed=(info.diskUsed/1073741824).toFixed(1),dTotal=(info.diskTotal/1073741824).toFixed(1);
+                document.getElementById('cpuDetail').textContent=cpu.toFixed(1)+'%';
+                document.getElementById('memDetail').textContent=(info.memoryUsed/1073741824).toFixed(1)+'G / '+(info.memoryTotal/1073741824).toFixed(1)+'G';
+                document.getElementById('diskDetail').textContent=dUsed+'G / '+dTotal+'G';
+                document.getElementById('uptimeDetail').textContent=info.uptime;
+                document.getElementById('serverStatus').innerHTML=t('online');
+                if(cpuChart)updateChart(cpuChart,cpu);
+                if(memChart)updateChart(memChart,mem);
+            }catch(e){document.getElementById('serverStatus').innerHTML=t('offline')}
         }
 
-        async function loadIp() {
-            try {
-                const res = await fetch('/api/system/ip');
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById('serverIp').textContent = data.ip;
+        async function loadIp(){
+            try{
+                const res=await fetch('/api/system/ip');
+                if(res.ok){
+                    const data=await res.json();
+                    document.getElementById('serverIp').textContent=data.local+':'+window.location.port;
+                    if(data.tailscale)document.getElementById('tailscaleIp').textContent='🌐 TS: '+data.tailscale;
                     return;
                 }
-            } catch (e) {}
-            document.getElementById('serverIp').textContent = window.location.hostname || window.location.host;
+            }catch(e){}
+            document.getElementById('serverIp').textContent=window.location.hostname||window.location.host;
         }
 
-        function initCharts() {
-            const opts = { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false},y:{display:false,min:0,max:100}} };
-            const cpuC = document.getElementById('cpuChart');
-            const memC = document.getElementById('memChart');
-            if (cpuC) cpuChart = new Chart(cpuC, { type:'line', data:{labels:[],datasets:[{data:[],borderColor:'#38bdf8',borderWidth:2,fill:false,pointRadius:0,tension:0.3}]}, options:opts });
-            if (memC) memChart = new Chart(memC, { type:'line', data:{labels:[],datasets:[{data:[],borderColor:'#4ade80',borderWidth:2,fill:false,pointRadius:0,tension:0.3}]}, options:opts });
+        function initCharts(){
+            const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false,min:0,max:100}}};
+            const cc=document.getElementById('cpuChart'),mc=document.getElementById('memChart');
+            if(cc)new Chart(cc,{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#38bdf8',borderWidth:2,fill:false,pointRadius:0,tension:0.3}]},options:opts});
+            if(mc)new Chart(mc,{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#4ade80',borderWidth:2,fill:false,pointRadius:0,tension:0.3}]},options:opts});
         }
 
-        function updateChart(chart, val) {
-            if (!chart) return;
-            const d = chart.data.datasets[0].data;
-            d.push(val); if (d.length > 20) d.shift();
-            chart.data.labels = d.map((_,i) => i);
+        function updateChart(chart,val){
+            if(!chart)return;
+            const d=chart.data.datasets[0].data;
+            d.push(val);if(d.length>20)d.shift();
+            chart.data.labels=d.map((_,i)=>i);
             chart.update();
         }
 
-        async function loadContainers() {
-            try {
-                const res = await fetch('/api/docker/containers');
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const containers = await res.json();
-                const tbody = document.getElementById('containers');
-                if (!containers.length) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="loading">' + t('noContainers') + '</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = '';
-                containers.forEach(c => {
-                    const isUp = c.status.startsWith('Up');
-                    const isPaused = c.status.startsWith('Paused');
-                    const badgeClass = isUp ? 'badge-up' : isPaused ? 'badge-paused' : 'badge-exited';
-                    const icon = isUp ? '🟢' : isPaused ? '🟡' : '🔴';
-                    tbody.innerHTML += '<tr data-name="' + c.name.toLowerCase() + '">' +
-                        '<td><span class="badge ' + badgeClass + '">' + icon + '</span></td>' +
-                        '<td><strong>' + c.name + '</strong></td>' +
-                        '<td style="color:var(--text-muted)">' + c.image + '</td>' +
-                        '<td class="' + (isUp ? 'status-up' : isPaused ? 'status-paused' : 'status-exited') + '">' + c.status + '</td>' +
-                        '<td style="color:var(--text-muted);font-size:0.8rem;">' + (c.ports || '—') + '</td>' +
-                        '<td id="cpu-' + c.name + '" style="font-family:monospace">-</td>' +
-                        '<td id="mem-' + c.name + '" style="font-family:monospace">-</td>' +
-                        '<td><div class="action-group">' +
-                            '<button class="action-btn logs" onclick="showLogs(\'' + c.name + '\')">📋</button>' +
-                            '<button class="action-btn details" onclick="showDetails(\'' + c.name + '\')">🔍</button>' +
-                            '<button class="action-btn start" onclick="execAction(\'start\',\'' + c.name + '\')">▶</button>' +
-                            '<button class="action-btn stop" onclick="execAction(\'stop\',\'' + c.name + '\')">⏹</button>' +
-                            '<button class="action-btn restart" onclick="execAction(\'restart\',\'' + c.name + '\')">🔄</button>' +
+        async function loadContainers(){
+            try{
+                const res=await fetch('/api/docker/containers');
+                if(!res.ok)throw new Error('HTTP '+res.status);
+                const containers=await res.json();
+                const tbody=document.getElementById('containers');
+                if(!containers.length){tbody.innerHTML='<tr><td colspan="8" class="loading">'+t('noContainers')+'</td></tr>';return;}
+                tbody.innerHTML='';
+                containers.forEach(c=>{
+                    const isUp=c.status.startsWith('Up'),isPaused=c.status.startsWith('Paused');
+                    const bc=isUp?'badge-up':isPaused?'badge-paused':'badge-exited';
+                    const icon=isUp?'🟢':isPaused?'🟡':'🔴';
+                    const sc=isUp?'status-up':isPaused?'status-paused':'status-exited';
+                    tbody.innerHTML+='<tr data-name="'+c.name.toLowerCase()+'">'+
+                        '<td><span class="badge '+bc+'">'+icon+'</span></td>'+
+                        '<td><strong>'+c.name+'</strong></td>'+
+                        '<td style="color:var(--text-muted)">'+c.image+'</td>'+
+                        '<td class="'+sc+'">'+c.status+'</td>'+
+                        '<td style="color:var(--text-muted);font-size:0.8rem;">'+(c.ports||'—')+'</td>'+
+                        '<td id="cpu-'+c.name+'" style="font-family:monospace">-</td>'+
+                        '<td id="mem-'+c.name+'" style="font-family:monospace">-</td>'+
+                        '<td><div class="action-group">'+
+                            '<button class="action-btn logs" onclick="showLogs(\''+c.name+'\')">📋</button>'+
+                            '<button class="action-btn details" onclick="showDetails(\''+c.name+'\')">🔍</button>'+
+                            '<button class="action-btn start" onclick="execAction(\'start\',\''+c.name+'\')">▶</button>'+
+                            '<button class="action-btn stop" onclick="execAction(\'stop\',\''+c.name+'\')">⏹</button>'+
+                            '<button class="action-btn restart" onclick="execAction(\'restart\',\''+c.name+'\')">🔄</button>'+
                         '</div></td></tr>';
                 });
                 filterContainers();
-            } catch (e) {
-                document.getElementById('containers').innerHTML = '<tr><td colspan="8" class="error">' + t('error') + '</td></tr>';
-            }
+            }catch(e){document.getElementById('containers').innerHTML='<tr><td colspan="8" class="error">'+t('error')+'</td></tr>'}
         }
 
-        async function loadStats() {
-            try {
-                const res = await fetch('/api/docker/stats');
-                if (!res.ok) return;
-                (await res.json()).forEach(s => {
-                    ['cpu','mem'].forEach(k => {
-                        const el = document.getElementById(k + '-' + s.name);
-                        if (el) el.textContent = s[k];
+        async function loadStats(){
+            try{
+                const res=await fetch('/api/docker/stats');
+                if(!res.ok)return;
+                (await res.json()).forEach(s=>{
+                    ['cpu','mem'].forEach(k=>{
+                        const el=document.getElementById(k+'-'+s.name);
+                        if(el)el.textContent=s[k];
                     });
                 });
-            } catch (e) {}
+            }catch(e){}
         }
 
-        function filterContainers() {
-            const q = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('#containers tr').forEach(tr => {
-                tr.style.display = (tr.dataset.name || '').includes(q) ? '' : 'none';
+        function filterContainers(){
+            const q=document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('#containers tr').forEach(tr=>{
+                tr.style.display=(tr.dataset.name||'').includes(q)?'':'none';
             });
         }
 
-        async function execAction(action, id) {
-            const msgs = { restart:t('confirmRestart'), start:t('confirmStart'), stop:t('confirmStop') };
-            if (!confirm(msgs[action] + ' ' + id + '?')) return;
-            try {
-                const res = await fetch('/api/docker/' + action + '/' + id, { method:'POST' });
-                const data = await res.json();
-                if (data.status === 'ok') { toast('✅ ' + action + ' ' + id, 'success'); loadContainers(); }
-                else toast('❌ ' + action + ' falló', 'error');
-            } catch (e) { toast('❌ Error', 'error'); }
+        async function execAction(action,id){
+            const msgs={restart:t('confirmRestart'),start:t('confirmStart'),stop:t('confirmStop')};
+            if(!confirm(msgs[action]+' '+id+'?'))return;
+            try{
+                const res=await fetch('/api/docker/'+action+'/'+id,{method:'POST'});
+                const data=await res.json();
+                if(data.status==='ok'){toast('✅ '+action+' '+id,'success');loadContainers();}
+                else toast('❌ '+action+' falló','error');
+            }catch(e){toast('❌ Error','error')}
         }
 
-        async function showLogs(id) {
-            currentLogId = id; logTail = 50;
-            document.getElementById('logModal').style.display = 'block';
-            document.getElementById('logTitle').textContent = '📋 Logs - ' + id;
-            document.getElementById('logContent').textContent = t('loading');
-            await fetchLogs(id, logTail);
+        async function showLogs(id){
+            currentLogId=id;logTail=50;
+            document.getElementById('logModal').style.display='block';
+            document.getElementById('logTitle').textContent='📋 Logs - '+id;
+            document.getElementById('logContent').textContent=t('loading');
+            await fetchLogs(id,logTail);
+        }
+        async function fetchLogs(id,tail){
+            try{
+                const res=await fetch('/api/docker/logs/'+id+'?tail='+tail);
+                if(!res.ok)throw new Error('HTTP '+res.status);
+                document.getElementById('logContent').textContent=(await res.json()).join('\n');
+            }catch(e){document.getElementById('logContent').textContent='Error'}
+        }
+        function loadMoreLogs(){if(currentLogId){logTail+=100;fetchLogs(currentLogId,logTail)}}
+        function downloadLogs(){
+            const b=new Blob([document.getElementById('logContent').textContent],{type:'text/plain'});
+            const a=document.createElement('a');a.href=URL.createObjectURL(b);
+            a.download=(currentLogId||'container')+'-logs.txt';a.click();URL.revokeObjectURL(a.href);
+            toast('⬇ Descargado','success');
         }
 
-        async function fetchLogs(id, tail) {
-            try {
-                const res = await fetch('/api/docker/logs/' + id + '?tail=' + tail);
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                document.getElementById('logContent').textContent = (await res.json()).join('\n');
-            } catch (e) { document.getElementById('logContent').textContent = 'Error'; }
+        async function showDetails(id){
+            document.getElementById('detailModal').style.display='block';
+            document.getElementById('detailTitle').textContent='📦 '+id;
+            document.getElementById('detailContent').textContent=t('loading');
+            try{
+                const res=await fetch('/api/docker/inspect/'+id);
+                if(!res.ok)throw new Error('HTTP '+res.status);
+                document.getElementById('detailContent').textContent=JSON.stringify(await res.json(),null,2);
+            }catch(e){document.getElementById('detailContent').textContent='Error'}
         }
 
-        function loadMoreLogs() { if (currentLogId) { logTail += 100; fetchLogs(currentLogId, logTail); } }
-
-        function downloadLogs() {
-            const b = new Blob([document.getElementById('logContent').textContent], { type:'text/plain' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(b);
-            a.download = (currentLogId || 'container') + '-logs.txt';
-            a.click(); URL.revokeObjectURL(a.href);
-            toast('⬇ Descargado', 'success');
-        }
-
-        async function showDetails(id) {
-            document.getElementById('detailModal').style.display = 'block';
-            document.getElementById('detailTitle').textContent = '📦 ' + id;
-            document.getElementById('detailContent').textContent = t('loading');
-            try {
-                const res = await fetch('/api/docker/inspect/' + id);
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                document.getElementById('detailContent').textContent = JSON.stringify(await res.json(), null, 2);
-            } catch (e) { document.getElementById('detailContent').textContent = 'Error'; }
-        }
-
-        async function showNetworks() {
-            document.getElementById('networkModal').style.display = 'block';
-            document.getElementById('networkTitle').textContent = '🌐 Redes Docker';
-            document.getElementById('networkList').innerHTML = '<div class="loading">Cargando...</div>';
-            try {
-                const res = await fetch('/api/docker/networks');
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const networks = await res.json();
-                let html = '';
-                for (const net of networks) {
-                    const nr = await fetch('/api/docker/networks/' + net.id);
-                    const nd = await nr.json();
-                    const ct = nd.Containers || {};
-                    html += '<div class="network-card">' +
-                        '<div class="net-header">' +
-                            '<div><span class="net-name">' + net.name + '</span> <span class="net-driver">(' + net.driver + ')</span></div>' +
-                            '<span class="badge badge-up">' + Object.keys(ct).length + '</span>' +
-                        '</div>' +
-                        '<div class="net-containers">' + (Object.values(ct).map(c => c.Name).join(', ') || '—') + '</div>' +
-                    '</div>';
+        async function showNetworks(){
+            document.getElementById('networkModal').style.display='block';
+            document.getElementById('networkTitle').textContent='🌐 Redes Docker';
+            document.getElementById('networkList').innerHTML='<div class="loading">Cargando...</div>';
+            try{
+                const res=await fetch('/api/docker/networks');
+                if(!res.ok)throw new Error('HTTP '+res.status);
+                const networks=await res.json();
+                let html='';
+                for(const net of networks){
+                    const nr=await fetch('/api/docker/networks/'+net.id);
+                    const nd=await nr.json();
+                    const ct=nd.Containers||{};
+                    html+='<div class="monitor-card" style="text-align:left;margin-bottom:0.75rem;">'+
+                        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">'+
+                            '<div><strong>'+net.name+'</strong> <span style="color:var(--text-muted);font-size:0.8rem;">('+net.driver+')</span></div>'+
+                            '<span class="badge badge-up">'+Object.keys(ct).length+'</span>'+
+                        '</div>'+
+                        '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.4rem;">'+
+                            (Object.values(ct).map(c=>c.Name).join(', ')||'—')+
+                        '</div></div>';
                 }
-                document.getElementById('networkList').innerHTML = html || '<div class="loading">Sin redes</div>';
-            } catch (e) {
-                document.getElementById('networkList').innerHTML = '<div class="error">Error</div>';
-            }
+                document.getElementById('networkList').innerHTML=html||'<div class="loading">Sin redes</div>';
+            }catch(e){document.getElementById('networkList').innerHTML='<div class="error">Error</div>'}
         }
 
-        async function load() { await loadSystem(); await loadContainers(); await loadStats(); }
+        async function monitorOn(){
+            try{
+                const res=await fetch('/api/system/monitor/on',{method:'POST'});
+                const data=await res.json();
+                document.getElementById('monitorStatus').textContent='Estado: 🟢 Encendido ('+data.exitCode+')';
+                toast('🖥 Monitor encendido','success');
+            }catch(e){toast('❌ Error','error')}
+        }
+        async function monitorOff(){
+            try{
+                const res=await fetch('/api/system/monitor/off',{method:'POST'});
+                const data=await res.json();
+                document.getElementById('monitorStatus').textContent='Estado: 🔴 Apagado ('+data.exitCode+')';
+                toast('🖥 Monitor apagado','info');
+            }catch(e){toast('❌ Error','error')}
+        }
+        async function powerAction(action){
+            const labels={reboot:'REINICIAR',shutdown:'APAGAR'};
+            if(!confirm('⚠️ ¿Estás seguro de '+labels[action]+' el servidor?'))return;
+            try{
+                const res=await fetch('/api/system/power/'+action,{method:'POST'});
+                const data=await res.json();
+                document.getElementById('powerLog').textContent=JSON.stringify(data,null,2);
+                toast('🔧 Comando ejecutado','info');
+            }catch(e){toast('❌ Error','error')}
+        }
 
-        loadIp();
-        load();
-        setInterval(load, 5000);
+        async function loadProcesses(){
+            const body=document.getElementById('procesosBody');
+            body.innerHTML='<tr><td colspan="6" class="loading">Cargando...</td></tr>';
+            try{
+                const res=await fetch('/api/system/processes');
+                if(!res.ok)throw new Error('HTTP '+res.status);
+                const procs=await res.json();
+                body.innerHTML='';
+                procs.slice(0,50).forEach(p=>{
+                    const cpu=parseFloat(p.cpu);
+                    body.innerHTML+='<tr>'+
+                        '<td class="text-mono">'+p.pid+'</td>'+
+                        '<td>'+p.user+'</td>'+
+                        '<td class="text-mono '+(cpu>50?'process-high-cpu':'')+'">'+p.cpu+'%</td>'+
+                        '<td class="text-mono">'+p.mem+'%</td>'+
+                        '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+p.command+'</td>'+
+                        '<td><button class="action-btn danger" onclick="killProcess(\''+p.pid+'\')">✕</button></td>'+
+                    '</tr>';
+                });
+            }catch(e){body.innerHTML='<tr><td colspan="6" class="error">Error</td></tr>'}
+        }
+        async function killProcess(pid){
+            if(!confirm('¿Matar proceso '+pid+'?'))return;
+            try{
+                const res=await fetch('/api/system/processes/'+pid+'/kill',{method:'POST'});
+                const data=await res.json();
+                if(data.status==='ok'){toast('✅ Proceso '+pid+' eliminado','success');loadProcesses();}
+                else toast('❌ Error al matar '+pid,'error');
+            }catch(e){toast('❌ Error','error')}
+        }
+
+        async function loadPorts(){
+            const body=document.getElementById('puertosBody');
+            body.innerHTML='<tr><td colspan="4" class="loading">Cargando...</td></tr>';
+            try{
+                const res=await fetch('/api/system/ports');
+                if(!res.ok)throw new Error('HTTP '+res.status);
+                const ports=await res.json();
+                body.innerHTML='';
+                ports.forEach(p=>{
+                    body.innerHTML+='<tr>'+
+                        '<td class="text-mono">'+p.proto+'</td>'+
+                        '<td class="text-mono">'+p.local+'</td>'+
+                        '<td class="text-mono">'+p.peer+'</td>'+
+                        '<td style="font-size:0.8rem;">'+(p.process||'—')+'</td>'+
+                    '</tr>';
+                });
+            }catch(e){body.innerHTML='<tr><td colspan="4" class="error">Error</td></tr>'}
+        }
+
+        async function loadServices(){
+            const body=document.getElementById('serviciosBody');
+            body.innerHTML='<tr><td colspan="4" class="loading">Cargando...</td></tr>';
+            try{
+                const res=await fetch('/api/system/services');
+                if(!res.ok)throw new Error('HTTP '+res.status);
+                const svcs=await res.json();
+                body.innerHTML='';
+                svcs.forEach(s=>{
+                    const isActive=s.active==='active';
+                    body.innerHTML+='<tr>'+
+                        '<td style="font-size:0.8rem;">'+s.name+'</td>'+
+                        '<td><span class="badge '+(isActive?'badge-up':'badge-exited')+'">'+s.active+'</span></td>'+
+                        '<td>'+s.sub+'</td>'+
+                        '<td>'+(isActive?'':'<button class="action-btn restart" onclick="restartService(\''+s.name+'\')">🔄</button>')+'</td>'+
+                    '</tr>';
+                });
+            }catch(e){body.innerHTML='<tr><td colspan="4" class="error">Error</td></tr>'}
+        }
+        async function restartService(name){
+            try{
+                const res=await fetch('/api/system/services/'+name+'/restart',{method:'POST'});
+                const data=await res.json();
+                if(data.status==='ok'){toast('✅ '+name+' reiniciado','success');loadServices();}
+                else toast('❌ Error al reiniciar '+name,'error');
+            }catch(e){toast('❌ Error','error')}
+        }
+
+        async function load(){await loadSystem();await loadContainers();await loadStats()}
+        loadIp();load();setInterval(load,5000);
     </script>
 </body>
 </html>

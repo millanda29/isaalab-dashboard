@@ -88,4 +88,78 @@ public class SystemService {
             return line != null ? line.replace("up ", "") : "unknown";
         }
     }
+
+    public List<Map<String, String>> getPorts() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder("sh", "-c", "ss -tlnp | tail -n +2");
+        Process process = pb.start();
+        List<Map<String, String>> list = new java.util.ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.trim().split("\\s+");
+                if (parts.length >= 4) {
+                    Map<String, String> p = new java.util.LinkedHashMap<>();
+                    p.put("proto", parts[0]);
+                    p.put("recvQ", parts[1]);
+                    p.put("sendQ", parts[2]);
+                    p.put("local", parts[3]);
+                    p.put("peer", parts.length > 4 ? parts[4] : "");
+                    p.put("process", parts.length > 5 ? parts[5] : "");
+                    list.add(p);
+                }
+            }
+        }
+        return list;
+    }
+
+    public List<Map<String, String>> getServices() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder("sh", "-c", "systemctl list-units --type=service --no-pager --no-legend | head -50");
+        Process process = pb.start();
+        List<Map<String, String>> list = new java.util.ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.trim().split("\\s+");
+                if (parts.length >= 3) {
+                    Map<String, String> s = new java.util.LinkedHashMap<>();
+                    s.put("name", parts[0]);
+                    s.put("load", parts[1]);
+                    s.put("active", parts[2]);
+                    s.put("sub", parts.length > 3 ? parts[3] : "");
+                    s.put("description", parts.length > 4 ? parts[parts.length - 1] : "");
+                    list.add(s);
+                }
+            }
+        }
+        return list;
+    }
+
+    public String getTailscaleIP() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder("sh", "-c", "ip addr show tailscale0 2>/dev/null | grep inet | awk '{print $2}' | cut -d'/' -f1");
+        Process process = pb.start();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+            String line = reader.readLine();
+            return line != null ? line : "No detectado";
+        }
+    }
+
+    public Map<String, Object> restartService(String name) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder("sudo", "systemctl", "restart", name);
+        Process process = pb.start();
+        int exitCode = process.waitFor();
+        return Map.of("status", exitCode == 0 ? "ok" : "error", "service", name);
+    }
+
+    public Map<String, String> getIp() throws IOException {
+        java.net.InetAddress ip = java.net.InetAddress.getLocalHost();
+        String tailscale = getTailscaleIP();
+        return Map.of(
+            "local", ip.getHostAddress(),
+            "hostname", ip.getHostName(),
+            "tailscale", tailscale.equals("No detectado") ? "" : tailscale
+        );
+    }
 }
