@@ -155,13 +155,25 @@ public class SystemService {
         return Map.of("status", exitCode == 0 ? "ok" : "error", "service", name);
     }
 
-    public Map<String, String> getIp() throws IOException {
-        java.net.InetAddress ip = java.net.InetAddress.getLocalHost();
+    public Map<String, String> getIp() throws IOException, InterruptedException {
+        String local = execCmd("nsenter", "-t", "1", "-n", "hostname", "-I");
+        String hostname = execCmd("nsenter", "-t", "1", "-n", "hostname");
         String tailscale = getTailscaleIP();
         return Map.of(
-            "local", ip.getHostAddress(),
-            "hostname", ip.getHostName(),
+            "local", local.contains(" ") ? local.split(" ")[0] : local,
+            "hostname", hostname,
             "tailscale", tailscale.equals("No detectado") ? "" : tailscale
         );
+    }
+
+    private String execCmd(String... cmd) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        Process process = pb.start();
+        process.waitFor();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+            String line = reader.readLine();
+            return line != null ? line.trim() : "unknown";
+        }
     }
 }
